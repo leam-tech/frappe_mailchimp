@@ -1,1 +1,2 @@
 frappe
+mailchimp_transactional
