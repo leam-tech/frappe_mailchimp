@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include frappe_mailchimp *.css
+recursive-include frappe_mailchimp *.csv
+recursive-include frappe_mailchimp *.html
+recursive-include frappe_mailchimp *.ico
+recursive-include frappe_mailchimp *.js
+recursive-include frappe_mailchimp *.json
+recursive-include frappe_mailchimp *.md
+recursive-include frappe_mailchimp *.png
+recursive-include frappe_mailchimp *.py
+recursive-include frappe_mailchimp *.svg
+recursive-include frappe_mailchimp *.txt
+recursive-exclude frappe_mailchimp *.pyc
