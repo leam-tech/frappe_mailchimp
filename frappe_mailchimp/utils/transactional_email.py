@@ -6,29 +6,40 @@ from mailchimp_transactional.api_client import ApiClientError
 from six import string_types
 
 
-def send_message_with_template(recipients, subject: str, from_email: str, template: str, template_content,
-                               raise_exc=False):
+def send_message_with_template(recipients, subject: str, from_email: str, template: str, variables, raise_exc=False):
   if isinstance(recipients, string_types):
     recipients = json.loads(recipients)
+  if isinstance(variables, string_types):
+    variables = json.loads(variables)
   if not raise_exc:
     try:
-      _send_message(recipients, subject, from_email, template, template_content)
+      return _send_message(recipients, subject, from_email, template, variables)
     except ApiClientError as error:
       frappe.log_error(str(error.__dict__), "Mailchimp: API Error")
     except Exception as e:
       frappe.log_error(str(e.__dict__), "Mailchimp: Error")
   else:
-    _send_message(recipients, subject, from_email, template, template_content)
+    return _send_message(recipients, subject, from_email, template, variables)
 
 
-def _send_message(recipients: list, subject: str, from_email: str, template: str, template_content: list):
+def _send_message(recipients: list, subject: str, from_email: str, template: str, variables: list):
   _validate_recipients(recipients)
-  _validate_template(template, template_content)
+  _validate_template(template, variables)
 
   client = mailchimp_transactional.Client(get_mailchimp_api_key())
   return client.messages.send_template(
-      {"template_name": template, "template_content": template_content,
-       "message": {"to": recipients, "subject": subject, "from_email": from_email}})
+      {
+          "template_name": template,
+          "template_content": [],  # For backward compatibility reason, just an empty array
+          "message": {
+              "to": recipients,
+              "subject": subject,
+              "from_email": from_email,
+              "merge_language": "handlebars",
+              "global_merge_vars": variables
+          }
+      }
+  )
 
 
 def get_mailchimp_api_key() -> str:
