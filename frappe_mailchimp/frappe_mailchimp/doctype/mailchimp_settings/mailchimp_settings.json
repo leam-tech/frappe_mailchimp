@@ -4,26 +4,26 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "api_key",
+  "transactional_email_api_key",
   "default_transactional_template"
  ],
  "fields": [
-  {
-   "fieldname": "api_key",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "API Key",
-   "reqd": 1
-  },
   {
    "description": "The default template to use when sending transactional emails",
    "fieldname": "default_transactional_template",
    "fieldtype": "Data",
    "label": "Default Transactional Template"
+  },
+  {
+   "fieldname": "transactional_email_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transactional Email API Key",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2020-09-14 18:15:18.329447",
+ "modified": "2020-09-16 11:03:45.934845",
  "modified_by": "Administrator",
  "module": "Frappe Mailchimp",
  "name": "Mailchimp Settings",

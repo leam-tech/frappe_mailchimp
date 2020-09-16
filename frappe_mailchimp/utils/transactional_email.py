@@ -67,7 +67,7 @@ def get_mailchimp_api_key() -> str:
   Returns the API key of Transactional Email of Mailchimp (Mandrill)
   :return:
   """
-  api_key = frappe.get_value("Mailchimp Settings", "Mailchimp Settings", "api_key")
+  api_key = frappe.get_value("Mailchimp Settings", "Mailchimp Settings", "transactional_email_api_key")
   if api_key is None:
     frappe.throw("Mailchimp API Key not specified")
   return api_key
