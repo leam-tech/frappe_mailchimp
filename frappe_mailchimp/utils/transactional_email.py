@@ -1,12 +1,15 @@
+import datetime
 import json
 
 import frappe
 import mailchimp_transactional
+from frappe.model.document import Document
+from frappe.utils import get_datetime_str
 from mailchimp_transactional.api_client import ApiClientError
 from six import string_types
 
 
-def send_email_with_template(recipients, subject: str, from_email: str, template: str, variables,
+def send_email_with_template(recipients, from_email: str, template: str, variables, subject: str = None,
                              raise_exc=False) -> dict:
   """
   Send a transactional email to a list of recipients using a template defined in Mailchimp (Mandrill)
@@ -14,7 +17,7 @@ def send_email_with_template(recipients, subject: str, from_email: str, template
   [{
     "email":"abc@example.com"
   }]
-  :param subject: The subject of the email
+  :param subject: The subject of the email (Optional since the subject can be set to a default)
   :param from_email: The sender of the email
   :param template: The name (slug) of the template as in Mandrill
   :param variables: The dynamic content in the template as a list of dict
@@ -34,9 +37,9 @@ def send_email_with_template(recipients, subject: str, from_email: str, template
     try:
       return _send_message(recipients, subject, from_email, template, variables)
     except ApiClientError as error:
-      frappe.log_error(str(error.__dict__), "Mailchimp: API Error")
+      frappe.log_error(frappe.get_traceback(), "Mailchimp: API Error")
     except Exception as e:
-      frappe.log_error(str(e.__dict__), "Mailchimp: Error")
+      frappe.log_error(frappe.get_traceback(), "Mailchimp: Error")
   else:
     # Raise exceptions
     return _send_message(recipients, subject, from_email, template, variables)
@@ -101,3 +104,29 @@ def _validate_recipients(recipients: list) -> None:
     email = recipient.get('email', None)
     if email is None:
       frappe.throw("Email must be specified")
+
+
+def create_vars_from_doc(doc: Document) -> list:
+  """
+  Utility function to prepare the template vars from a doc
+  :param doc: The document as a dictionary
+  :return:
+  """
+  if not doc:
+    return []
+  doc = doc.as_dict(convert_dates_to_str=True, no_nulls=True)
+  if len(doc) == 0:
+    return []
+  doctype = doc.get("doctype").lower()
+  template_vars = []
+  for k, v in doc.items():
+    if k == "name":
+      k = frappe.scrub(doctype) + "_" + k
+    # Remove iterables from the variables
+    if isinstance(v, (list, tuple, dict)):
+      continue
+    # Convert date object to string
+    if isinstance(v, datetime.date):
+      v = get_datetime_str(v)
+    template_vars.append({"name": k, "content": v})
+  return template_vars
