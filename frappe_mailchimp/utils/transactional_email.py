@@ -106,10 +106,12 @@ def _validate_recipients(recipients: list) -> None:
       frappe.throw("Email must be specified")
 
 
-def create_vars_from_doc(doc: Document) -> list:
+def create_vars_from_doc(doc: Document, key=None) -> list:
   """
   Utility function to prepare the template vars from a doc
   :param doc: The document as a dictionary
+  :param key: Optionally specify the key name. If not specified, the scrub name of the doctype will be used
+              For instance, Sales Order will be called sales_order
   :return:
   """
   if not doc:
@@ -119,14 +121,16 @@ def create_vars_from_doc(doc: Document) -> list:
     return []
   doctype = doc.get("doctype").lower()
   template_vars = []
+  to_del = []
   for k, v in doc.items():
-    if k == "name":
-      k = frappe.scrub(doctype) + "_" + k
     # Remove iterables from the variables
     if isinstance(v, (list, tuple, dict)):
+      to_del.append(k)
       continue
     # Convert date object to string
     if isinstance(v, datetime.date):
-      v = get_datetime_str(v)
-    template_vars.append({"name": k, "content": v})
+      doc[k] = get_datetime_str(v)
+  for k in to_del:
+    del doc[k]
+  template_vars.append({"name": key if key is not None else frappe.scrub(doctype), "content": doc})
   return template_vars
