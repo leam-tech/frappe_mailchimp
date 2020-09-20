@@ -10,7 +10,7 @@ from six import string_types
 
 
 def send_email_with_template(recipients, from_email: str, template: str, variables, subject: str = None,
-                             raise_exc=False) -> dict:
+                             bcc_address: str = None, raise_exc=False) -> dict:
   """
   Send a transactional email to a list of recipients using a template defined in Mailchimp (Mandrill)
   :param recipients: List of emails to send to.
@@ -25,6 +25,7 @@ def send_email_with_template(recipients, from_email: str, template: str, variabl
     "name":"variable_name",
     "content":"variable_value"
    }]
+  :param bcc_address: BCC Address
   :param raise_exc: Whether to raise exception or not when sending the email
   :return: The response from the Mailchimp Transactional API
   """
@@ -42,10 +43,11 @@ def send_email_with_template(recipients, from_email: str, template: str, variabl
       frappe.log_error(frappe.get_traceback(), "Mailchimp: Error")
   else:
     # Raise exceptions
-    return _send_message(recipients, subject, from_email, template, variables)
+    return _send_message(recipients, subject, from_email, template, variables, bcc_address)
 
 
-def _send_message(recipients: list, subject: str, from_email: str, template: str, variables: list) -> dict:
+def _send_message(recipients: list, subject: str, from_email: str, template: str, variables: list,
+                  bcc_address: str) -> dict:
   _validate_recipients(recipients)
   _validate_template(template, variables)
 
@@ -59,7 +61,8 @@ def _send_message(recipients: list, subject: str, from_email: str, template: str
               "subject": subject,
               "from_email": from_email,
               "merge_language": "handlebars",
-              "global_merge_vars": variables
+              "global_merge_vars": variables,
+              "bcc_address": bcc_address
           }
       }
   )
