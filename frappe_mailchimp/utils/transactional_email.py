@@ -47,7 +47,7 @@ def send_email_with_template(recipients, from_email: str, template: str, variabl
 
 
 def _send_message(recipients: list, subject: str, from_email: str, template: str, variables: list,
-                  bcc_address: str) -> dict:
+                  bcc_address: str = None) -> dict:
   _validate_recipients(recipients)
   _validate_template(template, variables)
 
